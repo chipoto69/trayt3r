@@ -1,7 +1,7 @@
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
+import { getResend } from "@/lib/email";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { resend } from "@/lib/email";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -12,6 +12,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "No signature" }, { status: 400 });
   }
 
+  const stripe = getStripe();
   let event;
 
   try {
@@ -36,6 +37,7 @@ export async function POST(req: Request) {
 
     if (customerEmail) {
       try {
+        const resend = getResend();
         await resend.emails.send({
           from: "Trajter <orders@trajter.com>",
           to: [customerEmail],
